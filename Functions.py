@@ -67,8 +67,36 @@ def findParameters(inputFile, featureColumn, actualValueColumn) :
 	
 	return np.linalg.solve(A, B)
 
+
+def findParametersForMultiVariate(inputFile, *featureColumn, actualValueColumn) :
+	# y = mx + c
+	features = list(featureColumn)
+	features.append("c")
+	dataset = pd.read_csv(inputFile)
+	data = dataset
+	data["c"] = 1
+
+	matrix = []
+	i =0
+	y_matrix = []
+	while i < len(features) :
+		row1 = []
+		j=0
+		while j < len(features) :
+			row1.append(sumOfColumnsMuliplication(data, features[i], features[j]))
+			j+=1
+		y_matrix.append(sumOfColumnsMuliplication(data, features[i],actualValueColumn))
+		matrix.append(row1)
+		i+=1
+	A = np.array(matrix)
+	print("A =", A)
+	B = np.array(y_matrix) 
+	print("B =", B)
+	return np.linalg.solve(A, B)
+
 def estimateValue(params, *featureValue) :
 	parameters = params[:-1]
+	print(params[-1])
 	output = (parameters.dot(featureValue)) + params[-1]
 	return output
 
@@ -76,23 +104,17 @@ def estimateValue(params, *featureValue) :
 
 
 if __name__ == "__main__" :
-	testMain("Python_project.csv","x","y")
-	params = findParameters("Python_project.csv", "x","y")
-
+	testMain("multivariate-date.csv","Salary","Education","Experience","Hours per week")
+	params = findParametersForMultiVariate("multivariate-date.csv", "Education","Experience","Hours per week", actualValueColumn= "Salary")
+	SUB = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")
 	strval =""
 	i = 0
 	while i < len(params) -1 :
-		strval = str(params[i]) + "x" + str(i) + "+ "
+		strval = strval + str(params[i]) + "x" + str(i) + "+ "
+		#strval = strval + str(params[i]) + "x" + str(i).translate(SUB) + "+ "
 		i += 1
 	strval  = strval + str(params[i])
-	print("Solutions: ",strval)
-	output = estimateValue(params, 70)
+	output = estimateValue(params, 16, 5,50)
 	print("Output : ", output )
 
-
-
-#𝑦=𝑚1𝑥1+𝑚2𝑥2+𝑐	
-#𝑚1Σ𝑥1𝑖2+𝑚2Σ𝑥2𝑖𝑥1𝑖+𝑐Σ𝑥1𝑖= Σ𝑥1𝑖𝑦𝑖
-#𝑚1Σ𝑥1𝑖𝑥2𝑖+𝑚2Σ𝑥2𝑖2+𝑐Σ𝑥2𝑖= Σ𝑥2𝑖𝑦𝑖
-#𝑚1Σ𝑥1𝑖+𝑚2Σ𝑥2𝑖+𝑐Σ1= Σ𝑦𝑖
 
