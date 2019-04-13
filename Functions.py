@@ -48,12 +48,12 @@ def findCorrCoff(dataSet, featureColumn, actualValueColumn) :
 
 def checkCorrelationCoeff(inputFile , valueColumn, *featureColumns ) :
 	data = pd.read_csv(inputFile)
+	print("--------------------------Correlation Coefficient ---------------------- ")
 	for feature in featureColumns:
 			corr_value = findCorrCoff(data, feature, valueColumn)
 			significant_stmt = "It is significant" if corr_value.isSignificant else "It is not significant"
 			print ("Correlation Coefficient of feature column %s with value column %s is %s. %s." % (feature, valueColumn, corr_value.corr, significant_stmt))
-
-
+			
 def findParameters(inputFile, featureColumn, actualValueColumn) :
 	# y = mx + c
 	data = pd.read_csv(inputFile)
@@ -141,7 +141,7 @@ if __name__ == "__main__" :
 	strval =""
 	i = 0
 	while i < len(params) -1 :
-		strval = strval + str(params[i]) + "x" + str(i+1) + " + "
+		strval = strval + str(params[i]) + "x" + str(i+1) + (" + " if params[i+1] > 0 else " ")
 		#strval = strval + str(params[i]) + "x" + str(i+1).translate(SUB) + "+ "
 		i += 1
 	strval  = strval + str(params[i])
