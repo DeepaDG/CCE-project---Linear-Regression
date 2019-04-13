@@ -6,6 +6,7 @@ import operator
 import math
 import csv
 import collections
+import sys
 
 CorrelationCoeff = collections.namedtuple('CorrelationCoeff', ['corr', 'isSignificant'])
 
@@ -53,7 +54,7 @@ def checkCorrelationCoeff(inputFile , valueColumn, *featureColumns ) :
 			corr_value = findCorrCoff(data, feature, valueColumn)
 			significant_stmt = "It is significant" if corr_value.isSignificant else "It is not significant"
 			print ("Correlation Coefficient of feature column %s with value column %s is %s. %s." % (feature, valueColumn, corr_value.corr, significant_stmt))
-			
+
 def findParameters(inputFile, featureColumn, actualValueColumn) :
 	# y = mx + c
 	data = pd.read_csv(inputFile)
@@ -134,19 +135,26 @@ def buildAnovaTable(inputFile, params, targetColumn, *featureNames) :
 	print(anovastats)
 	print("------------------------------------------------------------------------")
 
-if __name__ == "__main__" :
-	checkCorrelationCoeff("multivariate-date.csv","Salary","Education","Experience","Hours per week")
-	params = findParametersForMultiVariate("multivariate-date.csv", "Education","Experience","Hours per week", actualValueColumn= "Salary")
+def main(inputFile, targetColumn, *featuresAndValue):
+	features =[elem.split('=', 1)[0] for elem in featuresAndValue]
+	values =[float(elem.split('=', 1)[1]) for elem in featuresAndValue]
+	checkCorrelationCoeff(inputFile,targetColumn, *features)
+	params = findParametersForMultiVariate(inputFile, *features, actualValueColumn= targetColumn)
 	SUB = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")
 	strval =""
 	i = 0
 	while i < len(params) -1 :
-		strval = strval + str(params[i]) + "x" + str(i+1) + (" + " if params[i+1] > 0 else " ")
+		strval = strval + str(params[i]) + "x" + str(i+1) + (" + " if params[i+1] >= 0 else " ")
 		#strval = strval + str(params[i]) + "x" + str(i+1).translate(SUB) + "+ "
 		i += 1
 	strval  = strval + str(params[i])
-	output = estimateValue(params, 16, 5,50)
+	output = estimateValue(params, *values)
 	print("Equation : ", strval )
 	print("Output : ", output )
+
+if __name__ == "__main__" :
+	#main(sys.argv[1],sys.argv[2],sys.argv[3:])
+	main("multivariate-date.csv","Salary","Education=16","Experience=5","Hours per week=50")
+	
 
 
